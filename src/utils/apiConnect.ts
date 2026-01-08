@@ -27,19 +27,26 @@ export async function fetchMovie(
   
 }
 
-export async function fetchTranslation(moviePlot){
-    const URL = `http://localhost:5000/translate`;
-    const res = await fetch(URL, {
-        method: 'POST',
-        body: JSON.stringify({ 
-            q: moviePlot,
-            source: 'en',
-            target: 'pt',
-            format: 'text'
+export async function fetchTranslation(
+  moviePlot: string
+): Promise<{ translatedText: string }> {
 
-        }),
-        headers: { 'Content-Type': 'application/json' }
-    });
-    const translatedObj = await res.json();
-    return translatedObj;
+  const URL = `http://localhost:5000/translate`;
+
+  const res = await fetch(URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      q: moviePlot,
+      source: 'en',
+      target: 'pt',
+      format: 'text'
+    })
+  });
+
+  if (!res.ok) {
+    throw new Error(`Erro na tradução: ${res.status}`);
+  }
+
+  return res.json();
 }
