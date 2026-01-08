@@ -1,0 +1,11 @@
+import "dotenv/config";
+import app from "./app";
+
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+
+
+app.listen(PORT)
+  .on('error', console.error)
+  .on('listening', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+  });

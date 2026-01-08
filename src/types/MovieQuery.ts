@@ -1,0 +1,3 @@
+interface MovieQuery {
+    movie: string;
+}
