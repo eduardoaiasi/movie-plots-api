@@ -4,6 +4,7 @@
  */
 
 import { MovieInfo } from "../types/MovieInfo";
+import { OmdbMovieResponse } from "../types/OmdbMovieResponse";
 
 /**
  * Busca informações de um filme na API OMDB (Open Movie Database)
@@ -13,7 +14,7 @@ import { MovieInfo } from "../types/MovieInfo";
  */
 export async function fetchMovie(
     movieName: string
-): Promise<MovieInfo> {
+): Promise<OmdbMovieResponse> {
     // Constrói a URL da API OMDB com a chave de API e o nome do filme
     const URL = `http://www.omdbapi.com/?apikey=${process.env.API_KEY}&t=${movieName}&plot=full`;
 
@@ -37,8 +38,10 @@ export async function fetchMovie(
 
     // Retorna apenas os campos necessários (título e plot)
     return {
-        title: data.Title,
-        plot: data.Plot,
+        Title: data.Title,
+        Plot: data.Plot,
+        Response: data.Response,
+        Error: data.Error
     };
 }
 

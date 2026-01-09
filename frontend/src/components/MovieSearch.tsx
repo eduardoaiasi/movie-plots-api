@@ -1,27 +1,60 @@
+/**
+ * Componente principal de busca de filmes
+ * Gerencia o estado da interface e faz a busca de filmes através da API
+ */
+
 import { useState } from "react";
 import { fetchMovie } from "../services/api";
 import { Spinner } from "./Spinner";
 
-
+/**
+ * Componente que renderiza a interface de busca de filmes
+ * Permite ao usuário buscar um filme e exibe o título e plot traduzido
+ */
 export function MovieSearch() {
+  // Estado para armazenar o nome do filme digitado pelo usuário
   const [movie, setMovie] = useState("");
+  
+  // Estado para armazenar o título do filme retornado pela API
+  const [title, setTitle] = useState<string | null>(null);
+  
+  // Estado para armazenar o plot traduzido do filme
   const [plot, setPlot] = useState<string | null>(null);
+  
+  // Estado para controlar o loading durante a requisição
   const [loading, setLoading] = useState(false);
+  
+  // Estado para armazenar mensagens de erro
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Função assíncrona que lida com a busca do filme
+   * É chamada quando o usuário clica no botão "Buscar"
+   */
   async function handleSearch() {
+    // Valida se o campo não está vazio
     if (!movie.trim()) return;
 
     try {
+      // Inicia o estado de loading e limpa estados anteriores
       setLoading(true);
       setError(null);
       setPlot(null);
+      setTitle(null);
 
-      const translatedPlot = await fetchMovie(movie);
-      setPlot(translatedPlot);
-    } catch {
-      setError("Erro ao buscar o filme");
+      // Faz a requisição para a API do backend
+      const result = await fetchMovie(movie);
+      
+      // Atualiza os estados com os dados retornados
+      setTitle(result.title);
+      setPlot(result.plot);
+    } catch (err) {
+      // Tratamento de erros: extrai a mensagem de erro ou usa uma mensagem padrão
+      const errorMessage = err instanceof Error ? err.message : "Erro ao buscar o filme";
+      setError(errorMessage);
+      console.error("Erro ao buscar filme:", err);
     } finally {
+      // Sempre desativa o loading, independente de sucesso ou erro
       setLoading(false);
     }
   }
@@ -64,20 +97,21 @@ export function MovieSearch() {
           </p>
         )}
 
-       {plot && (
-          <div
-            className="bg-zinc-700 rounded-lg p-4
-                      transform transition-all duration-700 ease-out
-                      opacity-100 translate-y-0"
-          >
-            <h3 className="text-lg font-semibold text-white mb-2">
-              Plot traduzido
-            </h3>
-            <p className="text-zinc-200 leading-relaxed">
-              {plot}
-            </p>
-          </div>
-        )}
+      {plot && (
+        <div
+          className="bg-zinc-700 rounded-lg p-4
+                    transform transition-all duration-500 ease-out
+                    opacity-100 translate-y-0"
+        >
+          <h2 className="text-2xl font-bold text-white mb-3 text-center">
+            🎬 {title}
+          </h2>
+
+          <p className="text-zinc-200 leading-relaxed">
+            {plot}
+          </p>
+        </div>
+      )}
       </div>
     </div>
   );

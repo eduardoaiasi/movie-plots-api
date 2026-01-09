@@ -14,45 +14,67 @@ interface MovieQuery {
 
 class MovieController {
     /**
-     * Endpoint para buscar o plot de um filme traduzido para português
+     * Endpoint para buscar informações de um filme (título e plot traduzido)
+     * 
+     * FLUXO DE EXECUÇÃO:
+     * 1. Recebe requisição GET com parâmetro 'movie' na query string
+     * 2. Valida se o parâmetro foi fornecido
+     * 3. Chama MovieService.getMovieInfo() para buscar dados na API OMDB
+     * 4. Chama MovieService.getTranslation() para traduzir o plot
+     * 5. Retorna título e plot traduzido em formato JSON
+     * 
      * Rota: GET /movie/search?movie=NomeDoFilme
+     * Exemplo: GET /movie/search?movie=Inception
      * 
      * @param req - Objeto da requisição contendo o parâmetro 'movie' na query string
-     * @param res - Objeto da resposta HTTP
-     * @returns JSON com o plot do filme traduzido ou mensagem de erro
+     * @param res - Objeto da resposta HTTP para enviar dados ao cliente
+     * @returns JSON com { title: string, plot: string } ou mensagem de erro
      */
     static async getMoviePlot(
         req: Request<{}, {}, {}, MovieQuery>,
         res: Response
     ) {
         try {
-            // Extrai o nome do filme da query string
+            // PASSO 1: Extrai o nome do filme da query string da URL
+            // Exemplo: /movie/search?movie=Inception → movieName = "Inception"
             const movieName = req.query.movie;
 
-            // Valida se o parâmetro 'movie' foi fornecido
+            // PASSO 2: Valida se o parâmetro 'movie' foi fornecido
+            // Se não foi fornecido, retorna erro 400 (Bad Request)
             if(!movieName){
                 return  res.status(400).json({
                     message: "Movie é obrigatório" 
                 });
             }
 
-            // Busca as informações do filme na API OMDB
+            // PASSO 3: Busca as informações do filme na API OMDB
+            // Esta chamada faz uma requisição HTTP para a API OMDB externa
+            // Retorna um objeto MovieInfo com { title, plot } (plot em inglês)
             const movieInfo = await MovieService.getMovieInfo(movieName);
 
-            // Traduz o plot do filme do inglês para português
+            // PASSO 4: Traduz o plot do filme do inglês para português
+            // Esta chamada faz uma requisição HTTP para o serviço de tradução local
+            // Retorna um objeto Translation com { translatedText }
             const translatedPlot = 
                 await MovieService.getTranslation(movieInfo);
 
-            // Retorna apenas o texto traduzido
+            // PASSO 5: Retorna resposta HTTP 200 (OK) com os dados formatados
+            // O frontend receberá: { title: "Inception", plot: "plot traduzido..." }
             return res
                 .status(200)
-                .json(translatedPlot.translatedText);
+                .json({
+                    title: movieInfo.title,              // Título do filme
+                    plot: translatedPlot.translatedText // Plot traduzido para português
+                });
 
         }catch (error){
-            // Tratamento de erros: retorna mensagem de erro apropriada
-           if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
+            // Tratamento de erros: captura qualquer erro que ocorra durante o processo
+            // Pode ser erro da API OMDB, erro de tradução, ou erro de rede
+            if (error instanceof Error) {
+                // Se for um Error, retorna a mensagem de erro específica
+                return res.status(500).json({ message: error.message });
             }
+            // Se não for um Error conhecido, retorna mensagem genérica
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     }
