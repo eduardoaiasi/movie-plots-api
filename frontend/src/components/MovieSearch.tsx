@@ -64,8 +64,12 @@ export function MovieSearch() {
           </p>
         )}
 
-        {plot && (
-          <div className="bg-zinc-700 rounded-lg p-4">
+       {plot && (
+          <div
+            className="bg-zinc-700 rounded-lg p-4
+                      transform transition-all duration-700 ease-out
+                      opacity-100 translate-y-0"
+          >
             <h3 className="text-lg font-semibold text-white mb-2">
               Plot traduzido
             </h3>
