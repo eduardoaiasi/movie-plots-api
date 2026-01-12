@@ -73,6 +73,11 @@ export function MovieSearch() {
             placeholder="Digite o nome do filme"
             value={movie}
             onChange={(e) => setMovie(e.target.value)}
+            onKeyDown={(e) => {
+              if(e.key === "enter" && !loading && movie.trim()){
+                handleSearch();
+              }
+            }}
             className="w-full rounded-lg px-4 py-3 bg-zinc-700 text-white
                        placeholder-zinc-400 focus:outline-none
                        focus:ring-2 focus:ring-indigo-500"
