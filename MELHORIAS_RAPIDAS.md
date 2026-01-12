@@ -46,7 +46,7 @@ if (movie.trim().length < 2) {
 
 **Impacto**: Feedback imediato para o usuário, evita requisições desnecessárias.
 
----
+---xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ### 3. ✅ Timeout em Requisições HTTP (15 minutos)
 **Arquivo**: `backend/src/utils/apiConnect.ts`

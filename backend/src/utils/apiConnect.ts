@@ -21,28 +21,40 @@ export async function fetchMovie(
     // Faz a requisição HTTP para a API OMDB
     const res = await fetch(URL);
 
-    // Verifica se a resposta HTTP foi bem-sucedida
-    if (!res.ok) 
-    {
-        throw new Error(`Erro ao buscar o filme: ${res.status}`);
-    }
+    //Adicionar timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos de timeout
 
-    // Converte a resposta para JSON
-    const data = await res.json();
+    try{
+      // Verifica se a resposta HTTP foi bem-sucedida
+      if (!res.ok) 
+      {
+          throw new Error(`Erro ao buscar o filme: ${res.status}`);
+      }
 
-    // Verifica se a API retornou um erro (filme não encontrado, etc)
-    if (data.Response === "False") 
-    {
-        throw new Error(data.Error || "Filme não encontrado");
-    }
+      // Converte a resposta para JSON
+      const data = await res.json();
 
-    // Retorna apenas os campos necessários (título e plot)
-    return {
-        Title: data.Title,
-        Plot: data.Plot,
-        Response: data.Response,
-        Error: data.Error
-    };
+      // Verifica se a API retornou um erro (filme não encontrado, etc)
+      if (data.Response === "False") 
+      {
+          throw new Error(data.Error || "Filme não encontrado");
+      }
+
+      // Retorna apenas os campos necessários (título e plot)
+      return {
+          Title: data.Title,
+          Plot: data.Plot,
+          Response: data.Response,
+          Error: data.Error
+      };
+    }catch (error) {
+      clearTimeout(timeoutId);
+        if(error instanceof Error && error.name === 'AbortError'){
+            throw new Error('Tempo de espera esgotado ao buscar o filme.Tente novamente.');
+        }
+      throw error;
+  }
 }
 
 /**
