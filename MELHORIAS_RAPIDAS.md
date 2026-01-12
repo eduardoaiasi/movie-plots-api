@@ -24,7 +24,7 @@ Este documento lista melhorias que podem ser implementadas rapidamente (1-2 hora
 
 **Impacto**: Melhora significativa na UX - usuários podem buscar sem clicar no botão.
 
----
+---xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ### 2. ✅ Validação de Input no Frontend (10 minutos)
 **Arquivo**: `frontend/src/components/MovieSearch.tsx`

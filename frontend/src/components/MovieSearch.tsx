@@ -27,13 +27,21 @@ export function MovieSearch() {
   // Estado para armazenar mensagens de erro
   const [error, setError] = useState<string | null>(null);
 
+  // Validão de input no frontend para evitar buscas vazias
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   /**
    * Função assíncrona que lida com a busca do filme
    * É chamada quando o usuário clica no botão "Buscar"
    */
   async function handleSearch() {
     // Valida se o campo não está vazio
-    if (!movie.trim()) return;
+   if (movie.trim().length < 2) {
+     setValidationError("Digite pelo menos 2 caracteres");
+     return;
+    }
+
+    setValidationError(null);
 
     try {
       // Inicia o estado de loading e limpa estados anteriores
@@ -74,14 +82,18 @@ export function MovieSearch() {
             value={movie}
             onChange={(e) => setMovie(e.target.value)}
             onKeyDown={(e) => {
-              if(e.key === "enter" && !loading && movie.trim()){
+              if (e.key === 'Enter' && !loading && movie.trim()) {
                 handleSearch();
               }
-            }}
+            }} 
             className="w-full rounded-lg px-4 py-3 bg-zinc-700 text-white
                        placeholder-zinc-400 focus:outline-none
                        focus:ring-2 focus:ring-indigo-500"
           />
+
+          {validationError && (
+            <p className="text-yellow-400 text-sm mt-1">{validationError}</p>
+          )}
 
          <button
             onClick={handleSearch}
