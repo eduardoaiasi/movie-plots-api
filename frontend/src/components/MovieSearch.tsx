@@ -95,16 +95,24 @@ export function MovieSearch() {
             <p className="text-yellow-400 text-sm mt-1">{validationError}</p>
           )}
 
-         <button
-            onClick={handleSearch}
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500
-             disabled:opacity-50 disabled:cursor-not-allowed
-             text-white font-semibold py-3 rounded-lg
-             transition-colors flex items-center justify-center"
->
-            {loading ? <Spinner /> : "Buscar"}
-          </button>
+          <div className="flex justify-center">
+              {loading ? (
+                <div className="flex items-center justify-center gap-2 text-indigo-400 font-medium">
+                  <Spinner />
+                  <span>Buscando filme...</span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleSearch}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500
+                            text-white font-semibold py-3 rounded-lg
+                            transition-colors flex items-center justify-center"
+                >
+                  Buscar
+                </button>
+              )}
+            </div>
+          
 
         </div>
 
