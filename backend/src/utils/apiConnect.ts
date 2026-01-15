@@ -18,18 +18,30 @@ export async function fetchMovie(
     // Constrói a URL da API OMDB com a chave de API e o nome do filme
     const URL = `http://www.omdbapi.com/?apikey=${process.env.API_KEY}&t=${movieName}&plot=full`;
 
-    // Faz a requisição HTTP para a API OMDB
-    const res = await fetch(URL);
-
-    //Adicionar timeout
+    // Configura timeout para a requisição (10 segundos)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos de timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    try{
-      // Verifica se a resposta HTTP foi bem-sucedida
-      if (!res.ok) 
-      {
-          throw new Error(`Erro ao buscar o filme: ${res.status}`);
+    try {
+        // Faz a requisição HTTP para a API OMDB com timeout
+        const res = await fetch(URL, { signal: controller.signal });
+        
+        // Limpa o timeout se a requisição completar antes do timeout
+        clearTimeout(timeoutId);
+
+        // Verifica se a resposta HTTP foi bem-sucedida
+        if (!res.ok) 
+      { 
+          if(res.status === 401) {
+            throw new Error('Chave de API inválida. Por favor, verifique a variável de ambiente API_KEY.');
+          }
+          if(res.status === 404) {
+            throw new Error('Filme não encontrado. Por favor, verifique o nome do filme.');
+          }
+          if (res.status === 429) {
+            throw new Error('Muitas requisições. Tente novamente em alguns minutos.');
+          }
+          throw new Error(`Erro ao buscar o filme: ${res.status} ${res.statusText}`);
       }
 
       // Converte a resposta para JSON
@@ -38,7 +50,11 @@ export async function fetchMovie(
       // Verifica se a API retornou um erro (filme não encontrado, etc)
       if (data.Response === "False") 
       {
-          throw new Error(data.Error || "Filme não encontrado");
+          // Cria um erro customizado que pode ser identificado no controller
+          const error = new Error(data.Error || "Filme não encontrado");
+          // Adiciona uma propriedade para identificar que é um erro de "não encontrado"
+          (error as any).isNotFound = true;
+          throw error;
       }
 
       // Retorna apenas os campos necessários (título e plot)
@@ -48,13 +64,18 @@ export async function fetchMovie(
           Response: data.Response,
           Error: data.Error
       };
-    }catch (error) {
-      clearTimeout(timeoutId);
+    } catch (error) {
+        // Limpa o timeout em caso de erro
+        clearTimeout(timeoutId);
+        
+        // Trata erro de timeout especificamente
         if(error instanceof Error && error.name === 'AbortError'){
-            throw new Error('Tempo de espera esgotado ao buscar o filme.Tente novamente.');
+            throw new Error('Tempo de espera esgotado ao buscar o filme. Tente novamente.');
         }
-      throw error;
-  }
+        
+        // Propaga outros erros (incluindo erros de "não encontrado" com isNotFound)
+        throw error;
+    }
 }
 
 /**

@@ -71,7 +71,21 @@ class MovieController {
             // Tratamento de erros: captura qualquer erro que ocorra durante o processo
             // Pode ser erro da API OMDB, erro de tradução, ou erro de rede
             if (error instanceof Error) {
-                // Se for um Error, retorna a mensagem de erro específica
+                // Verifica se é um erro de "filme não encontrado"
+                // Quando a API OMDB retorna Response: "False", é um erro de não encontrado
+                const isNotFound = (error as any).isNotFound || 
+                                   error.message.toLowerCase().includes('not found') ||
+                                   error.message.toLowerCase().includes('não encontrado') ||
+                                   error.message.toLowerCase().includes('movie not found');
+                
+                if (isNotFound) {
+                    // Retorna 404 (Not Found) para filme não encontrado
+                    return res.status(404).json({ 
+                        message: error.message || "Filme não encontrado. Verifique o nome e tente novamente." 
+                    });
+                }
+                
+                // Para outros erros, retorna 500 (Internal Server Error)
                 return res.status(500).json({ message: error.message });
             }
             // Se não for um Error conhecido, retorna mensagem genérica

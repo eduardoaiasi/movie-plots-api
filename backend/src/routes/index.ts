@@ -10,7 +10,6 @@
 
 import {Express, json} from 'express';
 import movieRoutes from './movieRoute'; // Importando o router de filmes
-import { uptime } from 'node:process';
 
 /**
  * Função que configura todas as rotas da aplicação
@@ -23,13 +22,15 @@ const routes = (app: Express) => {
     // Permite que o Express entenda automaticamente o corpo das requisições em JSON
     app.use(json());
 
-    //Rota HEALTH CHECK, para verificar se o servidor está ativo, monitoramento e deploy em produção.
+    // Rota HEALTH CHECK, para verificar se o servidor está ativo, monitoramento e deploy em produção.
+    // Útil para verificar se o servidor está rodando e obter informações sobre o status
+    // Exemplo: GET http://localhost:3000/health
     app.get("/health", (_req, res) => {
         res.status(200).json({ 
-            status: "OK",
+            status: "ok",
             service: "movie-plots-api",
             timestamp: new Date().toISOString(), // Data e hora atuais em formato ISO
-            uptime: uptime() // Tempo em segundos desde que o processo foi iniciado 
+            uptime: process.uptime() // Tempo em segundos desde que o processo foi iniciado 
         });
     });
 
