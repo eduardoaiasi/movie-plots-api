@@ -117,9 +117,19 @@ export function MovieSearch() {
         </div>
 
         {error && (
-          <p className="text-red-400 text-center font-medium">
-            {error}
-          </p>
+          <div>
+            <p className="text-red-400 text-center font-medium">
+              {error}
+            </p>
+          <button
+            onClick={handleSearch}
+            className="mt-3 w-full bg-red-600 hover:bg-red-500
+                      text-white font-semibold py-3 rounded-lg
+                      transition-colors flex items-center justify-center"
+          >
+            Tente novamente.
+          </button>
+          </div>
         )}
 
       {plot && (
