@@ -3,7 +3,7 @@
  * Gerencia o estado da interface e faz a busca de filmes através da API
  */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { fetchMovie } from "../services/api";
 import { Spinner } from "./Spinner";
 
@@ -30,6 +30,8 @@ export function MovieSearch() {
   // Validão de input no frontend para evitar buscas vazias
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   /**
    * Função assíncrona que lida com a busca do filme
    * É chamada quando o usuário clica no botão "Buscar"
@@ -49,6 +51,7 @@ export function MovieSearch() {
       setError(null);
       setPlot(null);
       setTitle(null);
+      setMovie("");
 
       // Faz a requisição para a API do backend
       const result = await fetchMovie(movie);
@@ -77,6 +80,8 @@ export function MovieSearch() {
 
         <div className="space-y-3">
           <input
+            ref={inputRef}
+            autoFocus
             type="text"
             placeholder="Digite o nome do filme"
             value={movie}
@@ -92,9 +97,11 @@ export function MovieSearch() {
           />
 
           {validationError && (
+            
             <p className="text-yellow-400 text-sm mt-1">{validationError}</p>
+            
           )}
-
+          
           <div className="flex justify-center">
               {loading ? (
                 <div className="flex items-center justify-center gap-2 text-indigo-400 font-medium">
@@ -104,6 +111,7 @@ export function MovieSearch() {
               ) : (
                 <button
                   onClick={handleSearch}
+                  disabled={!movie.trim() || loading}
                   className="w-full bg-indigo-600 hover:bg-indigo-500
                             text-white font-semibold py-3 rounded-lg
                             transition-colors flex items-center justify-center"

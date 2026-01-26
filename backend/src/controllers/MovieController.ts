@@ -34,6 +34,21 @@ class MovieController {
         req: Request<{}, {}, {}, MovieQuery>,
         res: Response
     ) {
+        const movieName = req.query.movie?.trim();
+
+        if(!movieName || movieName.length <2){
+            return res.status(400).json({
+                message: "Nome do filme é obrigatório e deve ter pelo menos 2 caracteres"
+            });
+        }
+
+        if(movieName.length >100){
+            return res.status(400).json({
+                message: "Nome do filme é muito longo. Máximo de 100 caracteres permitido."
+            });
+        }
+        
+        const sanitized = movieName.replace(/[<>]/g, '');
         try {
             // PASSO 1: Extrai o nome do filme da query string da URL
             // Exemplo: /movie/search?movie=Inception → movieName = "Inception"

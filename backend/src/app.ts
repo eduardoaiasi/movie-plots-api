@@ -5,7 +5,7 @@
  * Este arquivo é o coração da aplicação backend, onde toda a configuração
  * do servidor HTTP é centralizada antes de ser iniciada no server.ts
  */
-
+import './config/env';
 import express from "express";
 import cors from "cors";
 import routes from "./routes/index"; 

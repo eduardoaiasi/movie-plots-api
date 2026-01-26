@@ -3,20 +3,19 @@
  * Responsável por inicializar e iniciar o servidor Express na porta configurada
  */
 
-// validação variáveis de ambiente
+// Carrega as variáveis de ambiente do arquivo .env (deve ser importado primeiro)
+import './config/env';
+import app from "./app";
 
-const requiredEnvVars = ['API_KEY'];
+// Validação variáveis de ambiente
+const requiredEnvVars = ['API_KEY', 'BASE_URL'];
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
-    console.error('❌ Variáveis de ambiente faltando:', missingVars.join(', '));
+    console.error('Variáveis de ambiente faltando:', missingVars.join(', '));
     console.error('Por favor, configure o arquivo .env');
     process.exit(1);
 }
-
-// Carrega as variáveis de ambiente do arquivo .env
-import "dotenv/config";
-import app from "./app";
 
 // Define a porta do servidor (usa a variável de ambiente PORT ou padrão 3000)
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
