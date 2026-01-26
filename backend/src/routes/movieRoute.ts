@@ -4,13 +4,15 @@
  */
 
 import {Router} from 'express';
-import MovieController from '../controllers/MovieController'; // Atenção ao Case Sensitive do nome do arquivo
+import MovieController from '../controllers/MovieController';
+import { movieSearchLimiter } from '../app'; // Importa o rate limiter específico
 
 // Cria um novo router para as rotas de filmes
 const router = Router();
 
 // Rota para buscar o plot de um filme traduzido
 // Exemplo de uso: GET /movie/search?movie=Inception
-router.get("/search", MovieController.getMoviePlot);
+// Aplica rate limiter específico para busca de filmes (10 requisições por minuto)
+router.get("/search", movieSearchLimiter, MovieController.getMoviePlot);
 
 export default router;
