@@ -34,38 +34,36 @@ class MovieController {
         req: Request<{}, {}, {}, MovieQuery>,
         res: Response
     ) {
+        // PASSO 1: Extrai e sanitiza o nome do filme da query string
         const movieName = req.query.movie?.trim();
 
-        if(!movieName || movieName.length <2){
+        // PASSO 2: Valida se o parâmetro foi fornecido e tem tamanho válido
+        if(!movieName || movieName.length < 2){
             return res.status(400).json({
                 message: "Nome do filme é obrigatório e deve ter pelo menos 2 caracteres"
             });
         }
 
-        if(movieName.length >100){
+        if(movieName.length > 100){
             return res.status(400).json({
                 message: "Nome do filme é muito longo. Máximo de 100 caracteres permitido."
             });
         }
         
+        // PASSO 3: Sanitiza o input removendo caracteres perigosos
         const sanitized = movieName.replace(/[<>]/g, '');
+        
+        // Log da busca
+        console.log(`[${new Date().toISOString()}] Busca de filme: "${sanitized}"`);
+        
         try {
-            // PASSO 1: Extrai o nome do filme da query string da URL
-            // Exemplo: /movie/search?movie=Inception → movieName = "Inception"
-            const movieName = req.query.movie;
-
-            // PASSO 2: Valida se o parâmetro 'movie' foi fornecido
-            // Se não foi fornecido, retorna erro 400 (Bad Request)
-            if(!movieName){
-                return  res.status(400).json({
-                    message: "Movie é obrigatório" 
-                });
-            }
-
-            // PASSO 3: Busca as informações do filme na API OMDB
+            // PASSO 4: Busca as informações do filme na API OMDB
             // Esta chamada faz uma requisição HTTP para a API OMDB externa
             // Retorna um objeto MovieInfo com { title, plot } (plot em inglês)
-            const movieInfo = await MovieService.getMovieInfo(movieName);
+            const movieInfo = await MovieService.getMovieInfo(sanitized);
+            
+            // Log de sucesso
+            console.log(`[${new Date().toISOString()}] Filme encontrado: "${movieInfo.title}"`);
 
             // PASSO 4: Traduz o plot do filme do inglês para português
             // Esta chamada faz uma requisição HTTP para o serviço de tradução local
@@ -82,7 +80,12 @@ class MovieController {
                     plot: translatedPlot.translatedText // Plot traduzido para português
                 });
 
-        }catch (error){
+        } catch (error) {
+            // Log de erro
+            if (error instanceof Error) {
+                console.error(`[${new Date().toISOString()}] Erro ao buscar filme:`, error.message);
+            }
+            
             // Tratamento de erros: captura qualquer erro que ocorra durante o processo
             // Pode ser erro da API OMDB, erro de tradução, ou erro de rede
             if (error instanceof Error) {

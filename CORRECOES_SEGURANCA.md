@@ -1,5 +1,31 @@
 # 🔧 Correções de Segurança - Guia de Implementação
 
+## 📊 STATUS DE IMPLEMENTAÇÃO
+
+**Última atualização:** Verificação do código atual
+
+### ✅ **JÁ IMPLEMENTADO:**
+1. ✅ Validação e Sanitização de Input (básica)
+2. ✅ Logging Básico (console.log com timestamps)
+3. ✅ Timeout em fetchMovie() (10 segundos)
+4. ✅ Mensagens de Erro Específicas (401, 404, 429)
+5. ✅ Validação de Variáveis de Ambiente (básica)
+6. ✅ Health Check Endpoint
+
+### ❌ **AINDA FALTA IMPLEMENTAR:**
+1. ❌ CORS Configurado
+2. ❌ Rate Limiting
+3. ❌ Helmet.js
+4. ❌ Ocultar Informações Sensíveis em Erros (produção)
+5. ❌ URLs com Variáveis de Ambiente
+6. ❌ Timeout em fetchTranslation()
+7. ❌ Frontend com Variáveis de Ambiente
+8. ❌ Limite de Tamanho de Payload
+9. ❌ Logging Estruturado (Winston)
+10. ❌ Validação Melhorada de Variáveis de Ambiente
+
+---
+
 ## 🚨 Correções Críticas (Implementar Primeiro)
 
 ### 1. Configurar CORS Corretamente
@@ -133,6 +159,22 @@ app.use(helmet({
 
 ### 4. Validar e Sanitizar Inputs
 
+**Status Atual:**
+```typescript
+// ✅ JÁ IMPLEMENTADO (básico):
+const movieName = req.query.movie?.trim();
+if(!movieName || movieName.length < 2) { /* validação */ }
+if(movieName.length > 100) { /* validação */ }
+const sanitized = movieName.replace(/[<>]/g, '');
+```
+
+**O que já está bom:**
+- ✅ Validação de comprimento (mínimo 2, máximo 100)
+- ✅ Sanitização básica (remove < e >)
+- ✅ Input sanitizado é usado no serviço
+
+**Melhoria Recomendada (usar biblioteca validator para produção):**
+
 **Instalar:**
 ```bash
 cd backend
@@ -142,7 +184,7 @@ npm install --save-dev @types/validator
 
 **Arquivo:** `backend/src/controllers/MovieController.ts`
 
-**Modificar:**
+**Melhorar para:**
 ```typescript
 import validator from 'validator';
 
@@ -194,6 +236,12 @@ static async getMoviePlot(
 
 **Arquivo:** `backend/src/controllers/MovieController.ts`
 
+**Status Atual:**
+```typescript
+// ⚠️ AINDA EXPÕE error.message EM PRODUÇÃO:
+return res.status(500).json({ message: error.message });
+```
+
 **Modificar o tratamento de erros:**
 ```typescript
 catch (error){
@@ -237,6 +285,13 @@ catch (error){
 ### 6. Corrigir URLs e Usar Variáveis de Ambiente
 
 **Arquivo:** `backend/src/utils/apiConnect.ts`
+
+**Status Atual:**
+```typescript
+// ❌ URLs AINDA HARDCODED:
+const URL = `http://www.omdbapi.com/?apikey=${process.env.API_KEY}&t=${movieName}&plot=full`;
+const URL = `http://localhost:5000/translate`;
+```
 
 **Modificar:**
 ```typescript
@@ -329,6 +384,12 @@ VITE_API_URL=https://api.seudominio.com
 
 **Arquivo:** `backend/src/app.ts`
 
+**Status Atual:**
+```typescript
+// ⚠️ SEM LIMITE CONFIGURADO:
+app.use(express.json());
+```
+
 **Modificar:**
 ```typescript
 app.use(express.json({ 
@@ -346,9 +407,23 @@ app.use(express.urlencoded({
 
 ### 9. Melhorar Validação de Variáveis de Ambiente
 
+**Status Atual:**
+```typescript
+// ✅ JÁ IMPLEMENTADO (básico):
+const requiredEnvVars = ['API_KEY', 'BASE_URL'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingVars.length > 0) { /* erro */ }
+```
+
+**O que já está bom:**
+- ✅ Valida existência das variáveis obrigatórias
+- ✅ Exibe mensagem de erro clara
+
+**Melhoria Recomendada (validar formato e valores):**
+
 **Arquivo:** `backend/src/config/env.ts`
 
-**Modificar:**
+**Melhorar:**
 ```typescript
 import dotenv from 'dotenv';
 import path from 'path';
@@ -430,6 +505,13 @@ for (const [key, config] of Object.entries(optionalEnvVars)) {
 ---
 
 ### 10. Implementar Logging Estruturado
+
+**Status Atual:**
+```typescript
+// ⚠️ AINDA USA console.log:
+console.log(`[${new Date().toISOString()}] Busca de filme: "${sanitized}"`);
+console.error(`[${new Date().toISOString()}] Erro ao buscar filme:`, error.message);
+```
 
 **Instalar:**
 ```bash
@@ -522,16 +604,46 @@ LOG_LEVEL=info
 
 ## 🚀 Ordem de Implementação Recomendada
 
-1. ✅ Configurar CORS
-2. ✅ Implementar Rate Limiting
-3. ✅ Adicionar Helmet.js
-4. ✅ Validar e sanitizar inputs
-5. ✅ Ocultar informações sensíveis em erros
-6. ✅ Corrigir URLs e variáveis de ambiente
-7. ✅ Configurar frontend com variáveis de ambiente
-8. ✅ Limitar tamanho de payload
-9. ✅ Melhorar validação de variáveis de ambiente
-10. ✅ Implementar logging estruturado
+### Prioridade 1 (CRÍTICO - Antes de produção):
+1. ❌ Configurar CORS
+2. ❌ Implementar Rate Limiting
+3. ❌ Adicionar Helmet.js
+4. ⚠️ Ocultar informações sensíveis em erros (parcial)
+5. ❌ Corrigir URLs e variáveis de ambiente
+
+### Prioridade 2 (ALTO - O mais rápido possível):
+6. ❌ Configurar frontend com variáveis de ambiente
+7. ❌ Limitar tamanho de payload
+8. ❌ Adicionar timeout em fetchTranslation()
+
+### Prioridade 3 (MÉDIO - Melhorias):
+9. ⚠️ Melhorar validação de variáveis de ambiente (básica OK)
+10. ⚠️ Implementar logging estruturado (tem básico, melhorar)
+11. ⚠️ Melhorar sanitização de inputs (básica OK, pode usar validator)
+
+---
+
+## 📊 Resumo do Status Atual
+
+### ✅ Implementado (6 itens):
+1. ✅ Validação de Input (básica)
+2. ✅ Sanitização de Input (básica)
+3. ✅ Logging Básico
+4. ✅ Timeout em fetchMovie()
+5. ✅ Mensagens de Erro Específicas
+6. ✅ Validação de Variáveis de Ambiente (básica)
+7. ✅ Health Check Endpoint
+
+### ❌ Falta Implementar (9 itens críticos/altos):
+1. ❌ CORS Configurado
+2. ❌ Rate Limiting
+3. ❌ Helmet.js
+4. ❌ Ocultar Informações Sensíveis em Erros (produção)
+5. ❌ URLs com Variáveis de Ambiente
+6. ❌ Timeout em fetchTranslation()
+7. ❌ Frontend com Variáveis de Ambiente
+8. ❌ Limite de Tamanho de Payload
+9. ❌ Logging Estruturado (Winston)
 
 ---
 

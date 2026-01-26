@@ -36,7 +36,7 @@ export function MovieSearch() {
    * Função assíncrona que lida com a busca do filme
    * É chamada quando o usuário clica no botão "Buscar"
    */
-  async function handleSearch() {
+    async function handleSearch() {
     // Valida se o campo não está vazio
    if (movie.trim().length < 2) {
      setValidationError("Digite pelo menos 2 caracteres");
@@ -45,20 +45,25 @@ export function MovieSearch() {
 
     setValidationError(null);
 
+    // Salva o nome do filme antes de limpar (para poder tentar novamente em caso de erro)
+    const movieToSearch = movie.trim();
+
     try {
       // Inicia o estado de loading e limpa estados anteriores
       setLoading(true);
       setError(null);
       setPlot(null);
       setTitle(null);
-      setMovie("");
 
       // Faz a requisição para a API do backend
-      const result = await fetchMovie(movie);
+      const result = await fetchMovie(movieToSearch);
       
       // Atualiza os estados com os dados retornados
       setTitle(result.title);
       setPlot(result.plot);
+      
+      // Limpa o input apenas após busca bem-sucedida
+      setMovie("");
     } catch (err) {
       // Tratamento de erros: extrai a mensagem de erro ou usa uma mensagem padrão
       const errorMessage = err instanceof Error ? err.message : "Erro ao buscar o filme";
